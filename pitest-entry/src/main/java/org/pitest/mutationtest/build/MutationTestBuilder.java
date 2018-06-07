@@ -55,10 +55,7 @@ public class MutationTestBuilder {
       final Collection<ClassName> codeClasses) {
     final List<MutationAnalysisUnit> tus = new ArrayList<>();
 
-    final List<MutationDetails> mutations = FCollection.flatMap(codeClasses,
-        classToMutations());
-
-    Collections.sort(mutations, comparator());
+    final List<MutationDetails> mutations = getAllMutations(codeClasses);
 
     final Collection<MutationResult> analysedMutations = this.analyser
         .analyse(mutations);
@@ -84,6 +81,14 @@ public class MutationTestBuilder {
 
     Collections.sort(tus, new AnalysisPriorityComparator());
     return tus;
+  }
+
+  public List<MutationDetails> getAllMutations(final Collection<ClassName> codeClasses) {
+    final List<MutationDetails> mutations = FCollection.flatMap(codeClasses,
+            classToMutations());
+
+    Collections.sort(mutations, comparator());
+    return mutations;
   }
 
   private Comparator<MutationDetails> comparator() {

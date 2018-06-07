@@ -108,9 +108,7 @@ public class MutationCoverage {
 
     final long t0 = System.currentTimeMillis();
 
-    verifyBuildSuitableForMutationTesting();
-
-    checkExcludedRunners();
+    checkCode();
 
     final CoverageDatabase coverageData = coverage().calculateCoverage();
 
@@ -141,8 +139,22 @@ public class MutationCoverage {
 
     recordClassPath(coverageData);
 
-    LOG.fine("Used memory before analysis start "
-        + ((runtime.totalMemory() - runtime.freeMemory()) / MB) + " mb");
+    runTests(runtime, config, tus);
+
+    LOG.info("Completed in " + timeSpan(t0));
+
+    printStats(stats);
+
+    return new CombinedStatistics(stats.getStatistics(),
+        coverageData.createSummary());
+
+  }
+
+  public void runTests(final Runtime runtime,
+      final List<MutationResultListener> config,
+      final List<MutationAnalysisUnit> tus) {
+    LOG.fine("Used memory before analysis start " + (
+        (runtime.totalMemory() - runtime.freeMemory()) / MB) + " mb");
     LOG.fine("Free Memory before analysis start " + (runtime.freeMemory() / MB)
         + " mb");
 
@@ -152,13 +164,11 @@ public class MutationCoverage {
     mae.run(tus);
     this.timings.registerEnd(Timings.Stage.RUN_MUTATION_TESTS);
 
-    LOG.info("Completed in " + timeSpan(t0));
+  }
 
-    printStats(stats);
-
-    return new CombinedStatistics(stats.getStatistics(),
-        coverageData.createSummary());
-
+  public void checkCode() {
+    verifyBuildSuitableForMutationTesting();
+    checkExcludedRunners();
   }
 
   private void checkExcludedRunners() {
@@ -305,7 +315,7 @@ private int numberOfThreads() {
   // For reasons not yet understood classes from rt.jar are not resolved for some
   // projects during static analysis phase. For now fall back to the classloader when
   // a class not provided by project classpath
-  private ClassByteArraySource fallbackToClassLoader(final ClassByteArraySource bas) {
+  public ClassByteArraySource fallbackToClassLoader(final ClassByteArraySource bas) {
     final ClassByteArraySource clSource = ClassloaderByteArraySource.fromContext();
     return clazz -> {
       final Optional<byte[]> maybeBytes = bas.getBytes(clazz);
