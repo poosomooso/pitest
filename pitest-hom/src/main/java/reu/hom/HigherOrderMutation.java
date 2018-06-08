@@ -1,32 +1,41 @@
 package reu.hom;
 
-import org.pitest.mutationtest.engine.Mutant;
+import org.pitest.mutationtest.engine.MutationDetails;
 
 import java.util.ArrayList;
 
 public class HigherOrderMutation {
-    private ArrayList<Mutant> mutants = new ArrayList<>();
+    private ArrayList<MutationDetails> mutants = new ArrayList<>();
 
-    public void addMutation(Mutant id) {
-        mutants.add(id);
+    /**
+     * TODO: Check if the new mutation is at the same location as an old one
+     * @param mutationDetails
+     */
+    public void addMutation(MutationDetails mutationDetails) {
+        if (mutants.contains(mutationDetails)) {
+            throw new IllegalArgumentException(
+                "This HOM already contains the mutation " + mutationDetails
+                    .getId());
+        }
+        mutants.add(mutationDetails);
     }
 
     public int getOrder() {
         return mutants.size();
     }
 
-    public ArrayList<Mutant> getMutants() {
+    public ArrayList<MutationDetails> getMutants() {
         return mutants;
     }
 
-    public Mutant getMutant(int i) {
+    public MutationDetails getMutant(int i) {
         return mutants.get(i);
     }
 
     @Override
     public HigherOrderMutation clone() {
         HigherOrderMutation newHOM = new HigherOrderMutation();
-        for (Mutant id : getMutants()) {
+        for (MutationDetails id : getMutants()) {
             newHOM.addMutation(id);
         }
         return newHOM;

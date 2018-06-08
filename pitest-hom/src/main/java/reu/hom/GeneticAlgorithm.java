@@ -1,6 +1,5 @@
 package reu.hom;
 
-
 import org.pitest.classinfo.ClassByteArraySource;
 import org.pitest.classpath.ClassPath;
 import org.pitest.classpath.ClassPathByteArraySource;
@@ -11,7 +10,6 @@ import org.pitest.coverage.CoverageGenerator;
 import org.pitest.coverage.execute.CoverageOptions;
 import org.pitest.coverage.execute.DefaultCoverageGenerator;
 import org.pitest.mutationtest.EngineArguments;
-import org.pitest.mutationtest.HistoryStore;
 import org.pitest.mutationtest.MutationConfig;
 import org.pitest.mutationtest.MutationResultListenerFactory;
 import org.pitest.mutationtest.build.MutationInterceptor;
@@ -24,12 +22,12 @@ import org.pitest.mutationtest.commandline.PluginFilter;
 import org.pitest.mutationtest.config.PluginServices;
 import org.pitest.mutationtest.config.ReportOptions;
 import org.pitest.mutationtest.config.SettingsFactory;
-import org.pitest.mutationtest.engine.Mutant;
 import org.pitest.mutationtest.engine.MutationDetails;
 import org.pitest.mutationtest.engine.MutationEngine;
-import org.pitest.mutationtest.incremental.ObjectOutputStreamHistoryStore;
-import org.pitest.mutationtest.statistics.MutationStatisticsListener;
-import org.pitest.mutationtest.tooling.*;
+import org.pitest.mutationtest.tooling.JarCreatingJarFinder;
+import org.pitest.mutationtest.tooling.KnownLocationJavaAgentFinder;
+import org.pitest.mutationtest.tooling.MutationCoverage;
+import org.pitest.mutationtest.tooling.MutationStrategies;
 import org.pitest.process.JavaAgent;
 import org.pitest.process.LaunchOptions;
 import org.pitest.util.ResultOutputStrategy;
@@ -99,7 +97,7 @@ public class GeneticAlgorithm {
         }
     }
 
-    public static List<MutationDetails> getMutations(ReportOptions data, SettingsFactory settings) {
+    protected static List<MutationDetails> getMutations(ReportOptions data, SettingsFactory settings) {
         // EntryPoint.java
         selectTestPlugin(data);
 
@@ -167,6 +165,32 @@ public class GeneticAlgorithm {
         return builder.getAllMutations(code.getCodeUnderTestNames());
     }
 
+    protected static MutationContainer[] genHOMs(int maxOrder, int numHOMs, List<MutationDetails> allFOMs) {
+        if (maxOrder <= 0) {
+            throw new IllegalArgumentException(
+                "The max order of higher order mutations must be greater than 0.");
+        }
+        MutationContainer[] homs = new MutationContainer[numHOMs];
+        for (int i = 0; i < numHOMs; i++) {
+            int order = Utils.randRange(0, maxOrder) + 1; // +1 for converting from index to length
+            HigherOrderMutation newHOM = new HigherOrderMutation();
+
+            for (int j = 0; j < order; j++) {
+                while (true) {
+                    try {
+                        int mutationIdx = Utils.randRange(0, numHOMs);
+                        newHOM.addMutation(allFOMs.get(mutationIdx));
+                        break;
+                    } catch (IllegalArgumentException e) {}
+                }
+            }
+
+            MutationContainer container = new MutationContainer(newHOM);
+            homs[i] = container;
+        }
+        return homs;
+    }
+
     /**
      * For now this is just printing to the console
      * TODO: actual archiving?
@@ -206,4 +230,6 @@ public class GeneticAlgorithm {
             return false;
         }
     }
+
+
 }

@@ -1,30 +1,37 @@
 package reu.hom;
 
 import org.pitest.mutationtest.engine.Mutant;
+import org.pitest.mutationtest.engine.MutationDetails;
+
+import java.util.List;
 
 public class MutationContainer implements Comparable<MutationContainer>{
     private HigherOrderMutation mutation;
-    private double fitness;
+    private double              fitness;
 
     public MutationContainer(HigherOrderMutation hom) {
         this.mutation = hom;
         this.fitness = mutationFitness(hom);
     }
 
-    public MutationContainer randomlyMutate(Mutant[] fomArr) {
+    public HigherOrderMutation getMutation() {
+        return mutation;
+    }
+
+    public MutationContainer randomlyMutate(List<MutationDetails> allFOMs) {
         if (Math.random() < 0.5) { //delete fom
-            int deletedIndex = (int) (Math.random() * mutation.getOrder());
+            int deletedIndex = Utils.randRange(0, mutation.getOrder());
             return deleteFOM(deletedIndex);
 
         } else { //add fom
-            int newFOMIndex = (int) (Math.random() * fomArr.length);
-            return addFOM(newFOMIndex, fomArr);
+            int newFOMIndex = Utils.randRange(0, allFOMs.size());
+            return addFOM(newFOMIndex, allFOMs);
         }
     }
 
     public MutationContainer[] crossover(MutationContainer o) {
-        int randIndex1 = ((int) (Math.random() * mutation.getOrder()));
-        int randIndex2 = ((int) (Math.random() * o.mutation.getOrder()));
+        int randIndex1 = Utils.randRange(0, mutation.getOrder());
+        int randIndex2 = Utils.randRange(0, o.mutation.getOrder());
 
         HigherOrderMutation child1 = new HigherOrderMutation();
         HigherOrderMutation child2 = new HigherOrderMutation();
@@ -89,9 +96,9 @@ public class MutationContainer implements Comparable<MutationContainer>{
         return new MutationContainer(newHom);
     }
 
-    protected MutationContainer addFOM(int fomToAdd, Mutant[] fomArr) {
+    protected MutationContainer addFOM(int fomToAdd, List<MutationDetails> allFOMs) {
         HigherOrderMutation newHom = mutation.clone();
-        newHom.addMutation(fomArr[fomToAdd]);
+        newHom.addMutation(allFOMs.get(fomToAdd));
         return new MutationContainer(newHom);
     }
 
