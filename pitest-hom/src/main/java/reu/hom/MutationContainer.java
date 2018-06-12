@@ -103,17 +103,17 @@ public class MutationContainer implements Comparable<MutationContainer>{
     }
 
     public static double mutationFitness(HigherOrderMutation hom) {
-        //Set allKilledTests = null;
-        //for m in hom
-        // killed = m.getKilledTests()
-        // for allKilledTests == null
-        //  allKilledTests = killed
-        // else
-        //  allKilledTests = allKilledTests.intersect(killed)
-
-        //fragilityFOM = allKilledTests.size() / numTests
-        //fragilityHOM = hom.getKilledTests() / numTests
-        //return fragilityHOM / fragilityFOM;
+//        Set allKilledTests = null;
+//        for m in hom
+//         killed = m.getKilledTests()
+//         for allKilledTests == null
+//          allKilledTests = killed
+//         else
+//          allKilledTests = allKilledTests.intersect(killed)
+//
+//        fragilityFOM = allKilledTests.size() / numTests
+//        fragilityHOM = hom.getKilledTests() / numTests
+//        return fragilityHOM / fragilityFOM;
         return 0.0;
     }
 }

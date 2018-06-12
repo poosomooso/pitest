@@ -25,7 +25,7 @@ import java.util.List;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 
-public class GeneticAlgorithmTest {
+public class MutationGenerationTest {
 
     private ReportOptions getTriangleData() {
         ReportOptions actual = new ReportOptions();
@@ -56,7 +56,7 @@ public class GeneticAlgorithmTest {
 
         PluginServices plugins = PluginServices.makeForContextLoader();
         SettingsFactory settingsFactory = new SettingsFactory(data, plugins);
-        assertFalse(GeneticAlgorithm.getMutations(data, settingsFactory).isEmpty());
+        assertFalse(MutationGeneration.getFOMs(data, settingsFactory).isEmpty());
     }
 
     @Test
@@ -74,7 +74,7 @@ public class GeneticAlgorithmTest {
 
         int maxOrder = 2;
         int numHOMs = 3;
-        MutationContainer[] mutations = GeneticAlgorithm.genHOMs(maxOrder, numHOMs, foms);
+        MutationContainer[] mutations = MutationGeneration.genHOMs(maxOrder, numHOMs, foms);
 
         assertEquals(numHOMs, mutations.length);
         for (MutationContainer m : mutations) {
