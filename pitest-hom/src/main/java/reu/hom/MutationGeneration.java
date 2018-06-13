@@ -95,7 +95,7 @@ public class MutationGeneration {
         .createInterceptor(data, bas);
 
     // Actually generating the mutations
-    final MutationSource source = new MutationSource(mutationConfig, testPrioritiser, bas, interceptor);
+    final MutationSource source = new AllTestsMutationSource(mutationConfig, testPrioritiser, bas, interceptor, coverageData);
     MutationTestBuilder builder = new MutationTestBuilder(null, null, source, null);
     return builder.getAllMutations(code.getCodeUnderTestNames());
   }

@@ -30,7 +30,7 @@ import org.pitest.util.Log;
 
 public class MutationSource {
 
-  private static final Logger        LOG = Log.getLogger();
+  protected static final Logger        LOG = Log.getLogger();
 
   private final MutationConfig       mutationConfig;
   private final TestPrioritiser      testPrioritiser;
@@ -71,7 +71,7 @@ public class MutationSource {
     }
   }
 
-  private void assignTestsToMutations(
+  protected void assignTestsToMutations(
       final Collection<MutationDetails> availableMutations) {
     for (final MutationDetails mutation : availableMutations) {
       final List<TestInfo> testDetails = this.testPrioritiser
