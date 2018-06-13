@@ -45,15 +45,15 @@ import org.pitest.util.Log;
 
 public class MutationTestWorker {
 
-  private static final Logger                               LOG   = Log
+  protected static final Logger                             LOG   = Log
       .getLogger();
 
   // micro optimise debug logging
-  private static final boolean                              DEBUG = LOG
+  protected static final boolean                            DEBUG = LOG
       .isLoggable(Level.FINE);
 
-  private final Mutater                                     mutater;
-  private final ClassLoader                                 loader;
+  protected final Mutater                                   mutater;
+  protected final ClassLoader                               loader;
   private final F3<ClassName, ClassLoader, byte[], Boolean> hotswap;
 
   public MutationTestWorker(
@@ -64,7 +64,7 @@ public class MutationTestWorker {
     this.hotswap = hotswap;
   }
 
-  protected void run(final Collection<MutationDetails> range, final Reporter r,
+  public void run(final Collection<MutationDetails> range, final Reporter r,
       final TimeOutDecoratedTestSource testSource) throws IOException {
 
     for (final MutationDetails mutation : range) {
@@ -153,7 +153,7 @@ public class MutationTestWorker {
     return mutationDetected;
   }
 
-  private static Container createNewContainer() {
+  protected static Container createNewContainer() {
     final Container c = new UnContainer() {
       @Override
       public List<TestResult> execute(final TestUnit group) {

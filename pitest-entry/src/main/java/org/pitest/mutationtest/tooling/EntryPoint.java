@@ -75,7 +75,8 @@ public class EntryPoint {
 
     final ClassPath cp = data.getClassPath();
 
-    final Optional<Reader> reader = data.createHistoryReader();
+    // changing this so the history resets every iteration
+    final Optional<Reader> reader = Optional.empty();//data.createHistoryReader();
     final WriterFactory historyWriter = data.createHistoryWriter();
 
     // workaround for apparent java 1.5 JVM bug . . . might not play nicely

@@ -1,9 +1,14 @@
-package reu.hom;
+package org.pitest.mutationtest.engine;
 
-import org.pitest.mutationtest.engine.MutationDetails;
+import org.pitest.classinfo.ClassName;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
+/**
+ * Can only represent mutants for one class
+ */
 public class HigherOrderMutation {
     private ArrayList<MutationDetails> mutants = new ArrayList<>();
 
@@ -24,18 +29,40 @@ public class HigherOrderMutation {
         return mutants.size();
     }
 
-    public ArrayList<MutationDetails> getMutants() {
+    public ArrayList<MutationDetails> getAllMutationDetails() {
         return mutants;
     }
 
-    public MutationDetails getMutant(int i) {
+    public MutationDetails getMutationDetail(int i) {
         return mutants.get(i);
+    }
+
+    public List<MutationIdentifier> getIds() {
+        return mutants.stream().map(md -> md.getId())
+            .collect(Collectors.toList());
+    }
+
+    public List<Mutant> getMutants(Mutater mutater) {
+        return getIds().stream().map(mutater::getMutation)
+            .collect(Collectors.toList());
+    }
+
+    public ClassName getClassName() {
+        if (mutants.size() > 0) {
+            return mutants.get(0).getClassName();
+        }
+        return null;
+    }
+
+    public List<byte[]> getBytes(Mutater mutater) {
+        return getMutants(mutater).stream().map(Mutant::getBytes)
+            .collect(Collectors.toList());
     }
 
     @Override
     public HigherOrderMutation clone() {
         HigherOrderMutation newHOM = new HigherOrderMutation();
-        for (MutationDetails id : getMutants()) {
+        for (MutationDetails id : getAllMutationDetails()) {
             newHOM.addMutation(id);
         }
         return newHOM;

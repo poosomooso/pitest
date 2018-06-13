@@ -1,6 +1,6 @@
 package reu.hom;
 
-import org.pitest.mutationtest.engine.Mutant;
+import org.pitest.mutationtest.engine.HigherOrderMutation;
 import org.pitest.mutationtest.engine.MutationDetails;
 
 import java.util.List;
@@ -38,17 +38,17 @@ public class MutationContainer implements Comparable<MutationContainer>{
 
         for (int i = 0; i < mutation.getOrder(); i++) {
             if (i == randIndex1) {
-                child1.addMutation(o.mutation.getMutant(randIndex2));
+                child1.addMutation(o.mutation.getMutationDetail(randIndex2));
             } else {
-                child1.addMutation(mutation.getMutant(i));
+                child1.addMutation(mutation.getMutationDetail(i));
             }
         }
 
         for (int i = 0; i < o.mutation.getOrder(); i++) {
             if (i == randIndex2) {
-                child1.addMutation(mutation.getMutant(randIndex1));
+                child1.addMutation(mutation.getMutationDetail(randIndex1));
             } else {
-                child1.addMutation(o.mutation.getMutant(i));
+                child1.addMutation(o.mutation.getMutationDetail(i));
             }
         }
         return new MutationContainer[]{new MutationContainer(child1), new MutationContainer(child2)};
@@ -89,7 +89,7 @@ public class MutationContainer implements Comparable<MutationContainer>{
 
         for (int i = 0; i < mutation.getOrder(); i++) {
             if (i != deletedIndex) {
-                newHom.addMutation(mutation.getMutant(i));
+                newHom.addMutation(mutation.getMutationDetail(i));
             }
         }
 

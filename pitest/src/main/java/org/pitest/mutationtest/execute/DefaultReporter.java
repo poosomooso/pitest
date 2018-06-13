@@ -27,7 +27,7 @@ public class DefaultReporter implements Reporter {
 
   private final SafeDataOutputStream w;
 
-  DefaultReporter(final OutputStream w) {
+  public DefaultReporter(final OutputStream w) {
     this.w = new SafeDataOutputStream(w);
   }
 

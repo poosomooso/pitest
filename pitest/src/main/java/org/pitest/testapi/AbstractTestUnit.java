@@ -34,4 +34,23 @@ public abstract class AbstractTestUnit implements TestUnit {
     return this.description;
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o)
+      return true;
+    if (o == null || getClass() != o.getClass())
+      return false;
+
+    AbstractTestUnit that = (AbstractTestUnit) o;
+
+    boolean descrEquals = description != null ?
+        description.equals(that.description) :
+        that.description == null;
+    return descrEquals && that.equals(this);
+  }
+
+  @Override
+  public int hashCode() {
+    return description != null ? description.hashCode() : 0;
+  }
 }

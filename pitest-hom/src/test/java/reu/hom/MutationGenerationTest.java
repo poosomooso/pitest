@@ -10,10 +10,7 @@ import org.pitest.classpath.ProjectClassPaths;
 import org.pitest.mutationtest.config.PluginServices;
 import org.pitest.mutationtest.config.ReportOptions;
 import org.pitest.mutationtest.config.SettingsFactory;
-import org.pitest.mutationtest.engine.Location;
-import org.pitest.mutationtest.engine.MethodName;
-import org.pitest.mutationtest.engine.MutationDetails;
-import org.pitest.mutationtest.engine.MutationIdentifier;
+import org.pitest.mutationtest.engine.*;
 import org.pitest.testapi.TestGroupConfig;
 import org.pitest.util.Glob;
 
@@ -81,7 +78,7 @@ public class MutationGenerationTest {
             HigherOrderMutation higherOrderMutation = m.getMutation();
             assertTrue(higherOrderMutation.getOrder() <= maxOrder);
             if (higherOrderMutation.getOrder() > 1) {
-                assertNotEquals(higherOrderMutation.getMutant(0), higherOrderMutation.getMutant(1));
+                assertNotEquals(higherOrderMutation.getMutationDetail(0), higherOrderMutation.getMutationDetail(1));
             }
         }
     }

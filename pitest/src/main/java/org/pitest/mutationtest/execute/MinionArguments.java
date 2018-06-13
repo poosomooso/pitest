@@ -27,13 +27,13 @@ public class MinionArguments implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  final Collection<MutationDetails> mutations;
-  final Collection<ClassName>       testClasses;
-  final String                      engine;
-  final EngineArguments             engineArgs;
-  final TimeoutLengthStrategy       timeoutStrategy;
-  final boolean                     verbose;
-  final TestPluginArguments         pitConfig;
+  public final Collection<MutationDetails> mutations;
+  public final Collection<ClassName>       testClasses;
+  public final String                      engine;
+  public final EngineArguments             engineArgs;
+  public final TimeoutLengthStrategy       timeoutStrategy;
+  public final boolean                     verbose;
+  public final TestPluginArguments         pitConfig;
 
   public MinionArguments(final Collection<MutationDetails> mutations,
       final Collection<ClassName> tests, final String engine,   final EngineArguments engineArgs,

@@ -38,4 +38,20 @@ public abstract class TestUnitDecorator implements TestUnit {
   @Override
   public abstract void execute(ResultCollector rc);
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o)
+      return true;
+    if (o == null || getClass() != o.getClass())
+      return false;
+
+    TestUnitDecorator that = (TestUnitDecorator) o;
+
+    return child != null ? child.equals(that.child) : that.child == null;
+  }
+
+  @Override
+  public int hashCode() {
+    return child != null ? child.hashCode() : 0;
+  }
 }

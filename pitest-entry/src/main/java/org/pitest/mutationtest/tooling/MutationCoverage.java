@@ -45,14 +45,7 @@ import org.pitest.mutationtest.ListenerArguments;
 import org.pitest.mutationtest.MutationAnalyser;
 import org.pitest.mutationtest.MutationConfig;
 import org.pitest.mutationtest.MutationResultListener;
-import org.pitest.mutationtest.build.MutationAnalysisUnit;
-import org.pitest.mutationtest.build.MutationGrouper;
-import org.pitest.mutationtest.build.MutationInterceptor;
-import org.pitest.mutationtest.build.MutationSource;
-import org.pitest.mutationtest.build.MutationTestBuilder;
-import org.pitest.mutationtest.build.PercentAndConstantTimeoutStrategy;
-import org.pitest.mutationtest.build.TestPrioritiser;
-import org.pitest.mutationtest.build.WorkerFactory;
+import org.pitest.mutationtest.build.*;
 import org.pitest.mutationtest.config.ReportOptions;
 import org.pitest.mutationtest.config.SettingsFactory;
 import org.pitest.mutationtest.engine.MutationEngine;
@@ -270,7 +263,8 @@ private int numberOfThreads() {
     final MutationInterceptor interceptor = this.settings.getInterceptor()
         .createInterceptor(this.data, bas);
 
-    final MutationSource source = new MutationSource(mutationConfig, testPrioritiser, bas, interceptor);
+    final MutationSource source = new AllTestsMutationSource(mutationConfig,
+        testPrioritiser, bas, interceptor, coverageData);
 
     final MutationAnalyser analyser = new IncrementalAnalyser(
         new DefaultCodeHistory(this.code, history()), coverageData);
@@ -281,9 +275,11 @@ private int numberOfThreads() {
             this.data.getTimeoutConstant()), this.data.isVerbose(), this.data
             .getClassPath().getLocalClassPath());
 
-    final MutationGrouper grouper = this.settings.getMutationGrouper().makeFactory(
-        this.data.getFreeFormProperties(), this.code,
-        this.data.getNumberOfThreads(), this.data.getMutationUnitSize());
+//    final MutationGrouper grouper = this.settings.getMutationGrouper().makeFactory(
+//        this.data.getFreeFormProperties(), this.code,
+//        this.data.getNumberOfThreads(), this.data.getMutationUnitSize());
+    final MutationGrouper grouper = new NoGrouper();
+
     final MutationTestBuilder builder = new MutationTestBuilder(wf, analyser,
         source, grouper);
 

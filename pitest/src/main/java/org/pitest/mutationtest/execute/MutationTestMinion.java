@@ -31,7 +31,6 @@ import org.pitest.classinfo.CachingByteArraySource;
 import org.pitest.classinfo.ClassByteArraySource;
 import org.pitest.classinfo.ClassName;
 import org.pitest.classpath.ClassloaderByteArraySource;
-import org.pitest.functional.F3;
 import org.pitest.functional.prelude.Prelude;
 import org.pitest.mutationtest.EngineArguments;
 import org.pitest.mutationtest.config.ClientPluginServices;
@@ -52,15 +51,15 @@ import org.pitest.util.SafeDataInputStream;
 
 public class MutationTestMinion {
 
-  private static final Logger       LOG = Log.getLogger();
+  protected static final Logger       LOG = Log.getLogger();
 
   // We maintain a small cache to avoid reading byte code off disk more than once
   // Size is arbitrary but assumed to be large enough to cover likely max number of inner classes
-  private static final int CACHE_SIZE = 12;
+  protected static final int CACHE_SIZE = 12;
 
-  private final SafeDataInputStream dis;
-  private final Reporter            reporter;
-  private final MinionSettings      plugins;
+  protected final SafeDataInputStream dis;
+  protected final Reporter            reporter;
+  protected final MinionSettings      plugins;
 
   public MutationTestMinion(MinionSettings plugins, final SafeDataInputStream dis,
       final Reporter reporter) {
@@ -82,14 +81,10 @@ public class MutationTestMinion {
       final ClassByteArraySource byteSource = new CachingByteArraySource(new ClassloaderByteArraySource(
           loader), CACHE_SIZE);
 
-      final F3<ClassName, ClassLoader, byte[], Boolean> hotswap = new HotSwap(
-          byteSource);
-
       final MutationEngine engine = createEngine(paramsFromParent.engine, paramsFromParent.engineArgs);
 
-
-      final MutationTestWorker worker = new MutationTestWorker(hotswap,
-          engine.createMutator(byteSource), loader);
+      final MutationTestWorker worker = getMutationTestWorker(engine,
+          byteSource, loader);
 
       final List<TestUnit> tests = findTestsForTestClasses(loader,
           paramsFromParent.testClasses, createTestPlugin(paramsFromParent.pitConfig));
@@ -107,11 +102,20 @@ public class MutationTestMinion {
 
   }
 
-  private MutationEngine createEngine(String engine, EngineArguments args) {
+  protected MutationTestWorker getMutationTestWorker(
+      MutationEngine engine, ClassByteArraySource byteSource,
+      ClassLoader loader) {
+    return new HigherOrderMutationTestWorker(new HotSwapHOM(byteSource),
+        engine.createMutator(byteSource), loader);
+//    return new MutationTestWorker(new HotSwap(byteSource),
+//        engine.createMutator(byteSource), loader);
+  }
+
+  protected MutationEngine createEngine(String engine, EngineArguments args) {
     return this.plugins.createEngine(engine).createEngine(args);
   }
 
-  private Configuration createTestPlugin(TestPluginArguments pitConfig) {
+  protected Configuration createTestPlugin(TestPluginArguments pitConfig) {
     return this.plugins.getTestFrameworkPlugin(pitConfig, ClassloaderByteArraySource.fromContext());
   }
 
@@ -146,7 +150,7 @@ public class MutationTestMinion {
 
   }
 
-  private static List<TestUnit> findTestsForTestClasses(
+  protected static List<TestUnit> findTestsForTestClasses(
       final ClassLoader loader, final Collection<ClassName> testClasses,
       final Configuration pitConfig) {
     final Collection<Class<?>> tcs = testClasses.stream().flatMap(ClassName.nameToClass(loader)).collect(Collectors.toList());
@@ -154,13 +158,13 @@ public class MutationTestMinion {
     return finder.findTestUnitsForAllSuppliedClasses(tcs);
   }
 
-  private static void enablePowerMockSupport() {
+  protected static void enablePowerMockSupport() {
     // Bwahahahahahahaha
     HotSwapAgent.addTransformer(new BendJavassistToMyWillTransformer(Prelude
         .or(new Glob("javassist/*")), JavassistInputStreamInterceptorAdapater.inputStreamAdapterSupplier(JavassistInterceptor.class)));
   }
 
-  private static void safelyCloseSocket(final Socket s) {
+  protected static void safelyCloseSocket(final Socket s) {
     if (s != null) {
       try {
         s.close();
@@ -170,7 +174,7 @@ public class MutationTestMinion {
     }
   }
 
-  private static void addMemoryWatchDog(final Reporter r) {
+  protected static void addMemoryWatchDog(final Reporter r) {
     final NotificationListener listener = (notification, handback) -> {
     final String type = notification.getType();
     if (type.equals(MemoryNotificationInfo.MEMORY_THRESHOLD_EXCEEDED)) {
