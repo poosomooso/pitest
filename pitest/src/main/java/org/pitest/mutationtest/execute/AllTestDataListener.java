@@ -43,4 +43,12 @@ public class AllTestDataListener implements TestListener {
   public void onRunEnd() {
 
   }
+
+  public Set<Description> getKilledTests() {
+    return killedTests;
+  }
+
+  public Set<Description> getSurvivedTests() {
+    return survivedTests;
+  }
 }

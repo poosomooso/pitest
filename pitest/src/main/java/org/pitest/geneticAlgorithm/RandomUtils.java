@@ -1,6 +1,6 @@
-package reu.hom;
+package org.pitest.geneticAlgorithm;
 
-public class Utils {
+public class RandomUtils {
   public static int randRange(int startInc, int endExc) {
     int range = endExc - startInc;
     return ((int) (Math.random() * range)) + startInc;

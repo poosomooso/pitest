@@ -32,6 +32,7 @@ import org.pitest.classinfo.ClassByteArraySource;
 import org.pitest.classinfo.ClassName;
 import org.pitest.classpath.ClassloaderByteArraySource;
 import org.pitest.functional.prelude.Prelude;
+import org.pitest.geneticAlgorithm.GeneticAlgorithmMutationTestWorker;
 import org.pitest.mutationtest.EngineArguments;
 import org.pitest.mutationtest.config.ClientPluginServices;
 import org.pitest.mutationtest.config.MinionSettings;
@@ -105,7 +106,7 @@ public class MutationTestMinion {
   protected MutationTestWorker getMutationTestWorker(
       MutationEngine engine, ClassByteArraySource byteSource,
       ClassLoader loader) {
-    return new HigherOrderMutationTestWorker(new HotSwapHOM(byteSource),
+    return new GeneticAlgorithmMutationTestWorker(new HotSwap(byteSource),
         engine.createMutator(byteSource), loader);
 //    return new MutationTestWorker(new HotSwap(byteSource),
 //        engine.createMutator(byteSource), loader);

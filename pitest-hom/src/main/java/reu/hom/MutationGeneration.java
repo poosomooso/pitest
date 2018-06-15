@@ -9,6 +9,8 @@ import org.pitest.coverage.CoverageDatabase;
 import org.pitest.coverage.CoverageGenerator;
 import org.pitest.coverage.execute.CoverageOptions;
 import org.pitest.coverage.execute.DefaultCoverageGenerator;
+import org.pitest.geneticAlgorithm.MutationContainer;
+import org.pitest.geneticAlgorithm.RandomUtils;
 import org.pitest.mutationtest.EngineArguments;
 import org.pitest.mutationtest.MutationConfig;
 import org.pitest.mutationtest.MutationResultListenerFactory;
@@ -109,13 +111,13 @@ public class MutationGeneration {
     }
     MutationContainer[] homs = new MutationContainer[numHOMs];
     for (int i = 0; i < numHOMs; i++) {
-      int order = Utils.randRange(0, maxOrder) + 1; // +1 for converting from index to length
+      int order = RandomUtils.randRange(0, maxOrder) + 1; // +1 for converting from index to length
       HigherOrderMutation newHOM = new HigherOrderMutation();
 
       for (int j = 0; j < order; j++) {
         while (true) {
           try {
-            int mutationIdx = Utils.randRange(0, numHOMs);
+            int mutationIdx = RandomUtils.randRange(0, numHOMs);
             newHOM.addMutation(allFOMs.get(mutationIdx));
             break;
           } catch (IllegalArgumentException e) {}

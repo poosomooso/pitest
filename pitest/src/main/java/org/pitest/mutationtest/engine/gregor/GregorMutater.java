@@ -112,6 +112,40 @@ public class GregorMutater implements Mutater {
 
   }
 
+  @Override
+  public Mutant getManyMutations(final List<MutationIdentifier> ids) {
+
+    final ClassContext context = new ClassContext();
+    context.setTargetMutation(Optional.ofNullable(ids.get(0)));
+
+    final Optional<byte[]> bytes = this.byteSource.getBytes(ids.get(0).getClassName()
+        .asJavaName());
+
+    final ClassReader reader = new ClassReader(bytes.get());
+    final ClassWriter w = new ComputeClassWriter(this.byteSource,
+        this.computeCache, FrameOptions.pickFlags(bytes.get()));
+
+    Predicate<MethodMutatorFactory> filterIds = null;
+    for (MutationIdentifier id : ids) {
+      if (filterIds == null) {
+        filterIds = isMutatorFor(id);
+      } else {
+        filterIds = filterIds.or(isMutatorFor(id));
+      }
+    }
+
+    final MutatingClassVisitor mca = new MutatingClassVisitor(w, context,
+        filterMethods(), FCollection.filter(this.mutators,
+        filterIds));
+    reader.accept(mca, ClassReader.EXPAND_FRAMES);
+
+    final List<MutationDetails> details = context.getMutationDetails(context
+        .getTargetMutation().get());
+
+    return new Mutant(details.get(0), w.toByteArray());
+
+  }
+
   private static Predicate<MethodMutatorFactory> isMutatorFor(
       final MutationIdentifier id) {
     return a -> id.getMutator().equals(a.getGloballyUniqueId());

@@ -47,6 +47,10 @@ public class HigherOrderMutation {
             .collect(Collectors.toList());
     }
 
+    public Mutant getMutant(Mutater mutater) {
+        return mutater.getManyMutations(getIds());
+    }
+
     public ClassName getClassName() {
         if (mutants.size() > 0) {
             return mutants.get(0).getClassName();
@@ -54,9 +58,10 @@ public class HigherOrderMutation {
         return null;
     }
 
-    public List<byte[]> getBytes(Mutater mutater) {
-        return getMutants(mutater).stream().map(Mutant::getBytes)
-            .collect(Collectors.toList());
+    public byte[] getBytes(Mutater mutater) {
+        return getMutant(mutater).getBytes();
+//        return getMutants(mutater).stream().map(Mutant::getBytes)
+//            .collect(Collectors.toList());
     }
 
     @Override

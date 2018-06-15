@@ -1,4 +1,4 @@
-package org.pitest.mutationtest.execute;
+package org.pitest.geneticAlgorithm;
 
 import org.pitest.classinfo.ClassName;
 import org.pitest.functional.F3;
@@ -7,6 +7,7 @@ import org.pitest.mutationtest.MutationStatusTestPair;
 import org.pitest.mutationtest.engine.HigherOrderMutation;
 import org.pitest.mutationtest.engine.Mutater;
 import org.pitest.mutationtest.engine.MutationDetails;
+import org.pitest.mutationtest.execute.AllTestDataListener;
 import org.pitest.mutationtest.execute.MutationTestWorker;
 import org.pitest.mutationtest.execute.Reporter;
 import org.pitest.mutationtest.execute.TimeOutDecoratedTestSource;
@@ -20,14 +21,14 @@ import java.util.stream.Collectors;
 
 import static org.pitest.util.Unchecked.translateCheckedException;
 
-public class HigherOrderMutationTestWorker extends MutationTestWorker {
+public class GeneticAlgorithmMutationTestWorker extends MutationTestWorker {
 
-  private final F3<ClassName, ClassLoader, List<byte[]>, Boolean> hotswapHOM;
+  private final F3<ClassName, ClassLoader, byte[], Boolean> hotswapHOM;
 
-  public HigherOrderMutationTestWorker(
-      F3<ClassName, ClassLoader, List<byte[]>, Boolean> hotswapMultiple, Mutater mutater,
+  public GeneticAlgorithmMutationTestWorker(
+      F3<ClassName, ClassLoader, byte[], Boolean> hotswapMultiple, Mutater mutater,
       ClassLoader loader) {
-    super(null, mutater, loader);
+    super(hotswapMultiple, mutater, loader);
     this.hotswapHOM = hotswapMultiple;
   }
 
@@ -35,22 +36,25 @@ public class HigherOrderMutationTestWorker extends MutationTestWorker {
   public void run(final Collection<MutationDetails> range, final Reporter r,
       final TimeOutDecoratedTestSource testSource) throws IOException {
 
+//    GeneticAlgorithm.geneticAlgorithm(range, hom -> processHOM(r, testSource, hom));
     // all pairs of mutants
     for (final MutationDetails mutation1 : range) {
       for (final MutationDetails mutation2 : range) {
-        if (DEBUG) {
-          LOG.fine("Running mutations " + mutation1 + " and " + mutation2);
-        }
+        if (!mutation1.equals(mutation2)) {
+          if (DEBUG) {
+            LOG.fine("Running mutations " + mutation1 + " and " + mutation2);
+          }
 
-        final long t0 = System.currentTimeMillis();
-        HigherOrderMutation mutation = new HigherOrderMutation();
-        mutation.addMutation(mutation1);
-        mutation.addMutation(mutation2);
-        processHOM(r, testSource, mutation);
+          final long t0 = System.currentTimeMillis();
+          HigherOrderMutation mutation = new HigherOrderMutation();
+          mutation.addMutation(mutation1);
+          mutation.addMutation(mutation2);
+          processHOM(r, testSource, mutation);
 
-        if (DEBUG) {
-          LOG.fine("processed mutations in " + (System.currentTimeMillis() - t0)
-              + " ms.");
+          if (DEBUG) {
+            LOG.fine(
+                "processed mutations in " + (System.currentTimeMillis() - t0) + " ms.");
+          }
         }
       }
     }
@@ -63,8 +67,8 @@ public class HigherOrderMutationTestWorker extends MutationTestWorker {
    * @param testSource
    * @param mutation
    */
-  private void processHOM(Reporter r, TimeOutDecoratedTestSource testSource,
-      HigherOrderMutation mutation) throws IOException {
+  private AllTestDataListener processHOM(Reporter r, TimeOutDecoratedTestSource testSource,
+      HigherOrderMutation mutation) {
 
     final List<TestUnit> allTests = mutation.getAllMutationDetails().stream()
         .map(md -> testSource.translateTests(md.getTestsInOrder())) // get tests for mutations
@@ -72,6 +76,7 @@ public class HigherOrderMutationTestWorker extends MutationTestWorker {
         .distinct() //remove duplicates
         .collect(Collectors.toList());
 
+    final AllTestDataListener listener = new AllTestDataListener();
     MutationStatusTestPair mutationDetected;
     if ((allTests == null) || allTests.isEmpty()) {
       LOG.info(
@@ -80,11 +85,19 @@ public class HigherOrderMutationTestWorker extends MutationTestWorker {
       mutationDetected = new MutationStatusTestPair(0,
           DetectionStatus.RUN_ERROR);
     } else {
-      final AllTestDataListener listener = new AllTestDataListener();
+
       mutationDetected = runMutation(mutation, allTests, listener);
     }
 
-    r.report(null, mutationDetected);
+    try {
+      r.report(null, mutationDetected);
+    } catch (IOException e) {
+
+    }
+    LOG.info(mutation.toString());
+    LOG.info("Killed Tests: " + listener.getKilledTests());
+    LOG.info("Survived Tests: " + listener.getSurvivedTests());
+    return listener;
   }
 
   private MutationStatusTestPair runMutation(final HigherOrderMutation mutation,
@@ -120,10 +133,10 @@ public class HigherOrderMutationTestWorker extends MutationTestWorker {
       pit.run(c, tests);
 
       int numberOfTestsRun =
-          listener.killedTests.size() + listener.survivedTests.size();
+          listener.getKilledTests().size() + listener.getSurvivedTests().size();
       return new MutationStatusTestPair(
           numberOfTestsRun,
-          listener.killedTests.size() > 0 ?
+          listener.getKilledTests().size() > 0 ?
               DetectionStatus.KILLED :
               DetectionStatus.SURVIVED);
     } catch (final Exception ex) {

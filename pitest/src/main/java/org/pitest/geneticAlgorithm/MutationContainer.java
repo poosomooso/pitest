@@ -1,4 +1,4 @@
-package reu.hom;
+package org.pitest.geneticAlgorithm;
 
 import org.pitest.mutationtest.engine.HigherOrderMutation;
 import org.pitest.mutationtest.engine.MutationDetails;
@@ -20,18 +20,18 @@ public class MutationContainer implements Comparable<MutationContainer>{
 
     public MutationContainer randomlyMutate(List<MutationDetails> allFOMs) {
         if (Math.random() < 0.5) { //delete fom
-            int deletedIndex = Utils.randRange(0, mutation.getOrder());
+            int deletedIndex = RandomUtils.randRange(0, mutation.getOrder());
             return deleteFOM(deletedIndex);
 
         } else { //add fom
-            int newFOMIndex = Utils.randRange(0, allFOMs.size());
+            int newFOMIndex = RandomUtils.randRange(0, allFOMs.size());
             return addFOM(newFOMIndex, allFOMs);
         }
     }
 
     public MutationContainer[] crossover(MutationContainer o) {
-        int randIndex1 = Utils.randRange(0, mutation.getOrder());
-        int randIndex2 = Utils.randRange(0, o.mutation.getOrder());
+        int randIndex1 = RandomUtils.randRange(0, mutation.getOrder());
+        int randIndex2 = RandomUtils.randRange(0, o.mutation.getOrder());
 
         HigherOrderMutation child1 = new HigherOrderMutation();
         HigherOrderMutation child2 = new HigherOrderMutation();

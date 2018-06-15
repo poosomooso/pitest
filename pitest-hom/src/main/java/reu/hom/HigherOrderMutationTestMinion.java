@@ -3,6 +3,7 @@ package reu.hom;
 import org.pitest.classinfo.CachingByteArraySource;
 import org.pitest.classinfo.ClassByteArraySource;
 import org.pitest.classpath.ClassloaderByteArraySource;
+import org.pitest.geneticAlgorithm.GeneticAlgorithmMutationTestWorker;
 import org.pitest.mutationtest.config.ClientPluginServices;
 import org.pitest.mutationtest.config.MinionSettings;
 import org.pitest.mutationtest.engine.MutationEngine;
@@ -91,7 +92,7 @@ public class HigherOrderMutationTestMinion extends MutationTestMinion {
   protected MutationTestWorker getMutationTestWorker(
       MutationEngine engine, ClassByteArraySource byteSource,
       ClassLoader loader) {
-    return new HigherOrderMutationTestWorker(new HotSwapHOM(byteSource),
+    return new GeneticAlgorithmMutationTestWorker(new HotSwapHOM(byteSource),
         engine.createMutator(byteSource), loader);
   }
 }

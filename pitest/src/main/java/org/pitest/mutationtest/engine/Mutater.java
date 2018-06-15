@@ -14,6 +14,7 @@
  */
 package org.pitest.mutationtest.engine;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.pitest.classinfo.ClassName;
@@ -31,6 +32,8 @@ public interface Mutater {
    * @return a Mutant
    */
   Mutant getMutation(MutationIdentifier id);
+
+  Mutant getManyMutations(final List<MutationIdentifier> ids);
 
   /**
    * Scans for possible mutants in the given class
