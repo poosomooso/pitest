@@ -106,7 +106,7 @@ public class GregorMutater implements Mutater {
     reader.accept(mca, ClassReader.EXPAND_FRAMES);
 
     final List<MutationDetails> details = context.getMutationDetails(context
-        .getTargetMutation().get());
+        .getTargetMutation().get(0));
 
     return new Mutant(details.get(0), w.toByteArray());
 
@@ -116,7 +116,11 @@ public class GregorMutater implements Mutater {
   public Mutant getManyMutations(final List<MutationIdentifier> ids) {
 
     final ClassContext context = new ClassContext();
-    context.setTargetMutation(Optional.ofNullable(ids.get(0)));
+    context.setTargetMutation(Optional.empty());
+
+    for (MutationIdentifier id : ids) {
+      context.addTargetMutation(Optional.ofNullable(id));
+    }
 
     final Optional<byte[]> bytes = this.byteSource.getBytes(ids.get(0).getClassName()
         .asJavaName());
@@ -140,7 +144,7 @@ public class GregorMutater implements Mutater {
     reader.accept(mca, ClassReader.EXPAND_FRAMES);
 
     final List<MutationDetails> details = context.getMutationDetails(context
-        .getTargetMutation().get());
+        .getTargetMutation().get(0)); //does this even make sense?
 
     return new Mutant(details.get(0), w.toByteArray());
 

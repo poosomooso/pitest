@@ -31,12 +31,12 @@ class ClassContext implements BlockCounter {
   private ClassInfo                   classInfo;
   private String                      sourceFile;
 
-  private Optional<MutationIdentifier>  target       = Optional.empty();
-  private final List<MutationDetails> mutations    = new ArrayList<>();
+  private       List<MutationIdentifier> target    = new ArrayList<>();
+  private final List<MutationDetails>    mutations = new ArrayList<>();
 
   private final ConcreteBlockCounter  blockCounter = new ConcreteBlockCounter();
 
-  public Optional<MutationIdentifier> getTargetMutation() {
+  public List<MutationIdentifier> getTargetMutation() {
     return this.target;
   }
 
@@ -53,7 +53,14 @@ class ClassContext implements BlockCounter {
   }
 
   public void setTargetMutation(final Optional<MutationIdentifier> target) {
-    this.target = target;
+    this.target.clear();
+    addTargetMutation(target);
+  }
+
+  public void addTargetMutation(final Optional<MutationIdentifier> target) {
+    if (target.isPresent()) {
+      this.target.add(target.get());
+    }
   }
 
   public List<MutationDetails> getMutationDetails(final MutationIdentifier id) {
@@ -73,7 +80,7 @@ class ClassContext implements BlockCounter {
   }
 
   public boolean shouldMutate(final MutationIdentifier newId) {
-    return getTargetMutation().filter(idMatches(newId)).isPresent();
+    return getTargetMutation().contains(newId);
   }
 
   private static Predicate<MutationIdentifier> idMatches(
