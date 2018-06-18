@@ -2,56 +2,35 @@ package org.pitest.geneticAlgorithm;
 
 import org.pitest.mutationtest.engine.HigherOrderMutation;
 import org.pitest.mutationtest.engine.MutationDetails;
+import org.pitest.mutationtest.execute.AllTestDataListener;
+import org.pitest.testapi.Description;
+import org.pitest.util.Log;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
 
 public class MutationContainer implements Comparable<MutationContainer>{
-    private HigherOrderMutation mutation;
-    private double              fitness;
+    private final HigherOrderMutation mutation;
+    private final double              fitness;
+    private final Set<Description>    killedTests;
+    private final double              numTests;
 
-    public MutationContainer(HigherOrderMutation hom) {
+    public MutationContainer(HigherOrderMutation hom,
+        Function<HigherOrderMutation, AllTestDataListener> testRunner,
+        Map<MutationDetails, MutationContainer> foms) {
         this.mutation = hom;
-        this.fitness = mutationFitness(hom);
+        AllTestDataListener listener = testRunner.apply(hom);
+        this.killedTests = listener.getKilledTests();
+        this.numTests =
+            listener.getKilledTests().size() + listener.getSurvivedTests()
+                .size();
+        this.fitness = mutationFitness(foms);
     }
 
     public HigherOrderMutation getMutation() {
         return mutation;
-    }
-
-    public MutationContainer randomlyMutate(List<MutationDetails> allFOMs) {
-        if (Math.random() < 0.5) { //delete fom
-            int deletedIndex = RandomUtils.randRange(0, mutation.getOrder());
-            return deleteFOM(deletedIndex);
-
-        } else { //add fom
-            int newFOMIndex = RandomUtils.randRange(0, allFOMs.size());
-            return addFOM(newFOMIndex, allFOMs);
-        }
-    }
-
-    public MutationContainer[] crossover(MutationContainer o) {
-        int randIndex1 = RandomUtils.randRange(0, mutation.getOrder());
-        int randIndex2 = RandomUtils.randRange(0, o.mutation.getOrder());
-
-        HigherOrderMutation child1 = new HigherOrderMutation();
-        HigherOrderMutation child2 = new HigherOrderMutation();
-
-        for (int i = 0; i < mutation.getOrder(); i++) {
-            if (i == randIndex1) {
-                child1.addMutation(o.mutation.getMutationDetail(randIndex2));
-            } else {
-                child1.addMutation(mutation.getMutationDetail(i));
-            }
-        }
-
-        for (int i = 0; i < o.mutation.getOrder(); i++) {
-            if (i == randIndex2) {
-                child1.addMutation(mutation.getMutationDetail(randIndex1));
-            } else {
-                child1.addMutation(o.mutation.getMutationDetail(i));
-            }
-        }
-        return new MutationContainer[]{new MutationContainer(child1), new MutationContainer(child2)};
     }
 
     /**
@@ -81,39 +60,28 @@ public class MutationContainer implements Comparable<MutationContainer>{
 
     @Override
     public String toString() {
-        return "MutationContainer [fitness=" + fitness + ", hom=" + mutation + "]";
+        return "MutationContainer [fitness=" + fitness + ", killedTests=" + killedTests + ", hom=" + mutation + "]";
     }
 
-    protected MutationContainer deleteFOM(int deletedIndex) {
-        HigherOrderMutation newHom = new HigherOrderMutation();
-
-        for (int i = 0; i < mutation.getOrder(); i++) {
-            if (i != deletedIndex) {
-                newHom.addMutation(mutation.getMutationDetail(i));
+    public double mutationFitness(Map<MutationDetails, MutationContainer> foms) {
+        if (mutation.getOrder() <= 1) {
+            Log.getLogger().fine("FOM killed tests: " + this.killedTests.size());
+            return 0.0;
+        }
+        Set<Description> fomKilledTests = null;
+        for (MutationDetails m : mutation.getAllMutationDetails()) {
+            Log.getLogger().fine("FOM: killed " + foms.get(m).killedTests.size());
+            if (fomKilledTests == null) {
+                fomKilledTests = foms.get(m).killedTests;
+            } else {
+                // intersect
+                fomKilledTests.retainAll(foms.get(m).killedTests);
             }
         }
 
-        return new MutationContainer(newHom);
-    }
-
-    protected MutationContainer addFOM(int fomToAdd, List<MutationDetails> allFOMs) {
-        HigherOrderMutation newHom = mutation.clone();
-        newHom.addMutation(allFOMs.get(fomToAdd));
-        return new MutationContainer(newHom);
-    }
-
-    public static double mutationFitness(HigherOrderMutation hom) {
-//        Set allKilledTests = null;
-//        for m in hom
-//         killed = m.getKilledTests()
-//         for allKilledTests == null
-//          allKilledTests = killed
-//         else
-//          allKilledTests = allKilledTests.intersect(killed)
-//
-//        fragilityFOM = allKilledTests.size() / numTests
-//        fragilityHOM = hom.getKilledTests() / numTests
-//        return fragilityHOM / fragilityFOM;
-        return 0.0;
+        double fragilityFOM = fomKilledTests.size() / this.numTests;
+        double fragilityHOM = this.killedTests.size() / this.numTests;
+        Log.getLogger().fine("FOM: " + fragilityFOM + " HOM: " + fragilityHOM);
+        return fragilityHOM / fragilityFOM;
     }
 }

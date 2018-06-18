@@ -76,4 +76,10 @@ public class HigherOrderMutation {
     public String toString() {
         return "HigherOrderMutation [order=" + getOrder() + ", FOMs=" + mutants.toString() + "]";
     }
+
+    public static HigherOrderMutation fomAsHom(MutationDetails fom) {
+        HigherOrderMutation m = new HigherOrderMutation();
+        m.addMutation(fom);
+        return m;
+    }
 }

@@ -36,30 +36,30 @@ public class GeneticAlgorithmMutationTestWorker extends MutationTestWorker {
   public void run(final Collection<MutationDetails> range, final Reporter r,
       final TimeOutDecoratedTestSource testSource) throws IOException {
 
-//    GeneticAlgorithm.geneticAlgorithm(range, hom -> processHOM(r, testSource, hom));
+    GeneticAlgorithm ga = new GeneticAlgorithm(Collections.unmodifiableList(new ArrayList<>(range)), hom -> processHOM(r, testSource, hom));
+    LOG.info("STARTING GENETIC ALGORITHM -------------------------- SIZE " + range.size());
+    ga.geneticAlgorithm();
     // all pairs of mutants
-    for (final MutationDetails mutation1 : range) {
-      for (final MutationDetails mutation2 : range) {
-        if (!mutation1.equals(mutation2)) {
-          if (DEBUG) {
-            LOG.fine("Running mutations " + mutation1 + " and " + mutation2);
-          }
-
-          final long t0 = System.currentTimeMillis();
-          HigherOrderMutation mutation = new HigherOrderMutation();
-          mutation.addMutation(mutation1);
-          mutation.addMutation(mutation2);
-          processHOM(r, testSource, mutation);
-
-          if (DEBUG) {
-            LOG.fine(
-                "processed mutations in " + (System.currentTimeMillis() - t0) + " ms.");
-          }
-        }
-      }
+//    for (final MutationDetails mutation1 : range) {
+//      for (final MutationDetails mutation2 : range) {
+//        if (!mutation1.equals(mutation2)) {
+//          if (DEBUG) {
+//            LOG.fine("Running mutations " + mutation1 + " and " + mutation2);
+//          }
+//
+//          final long t0 = System.currentTimeMillis();
+//          HigherOrderMutation mutation = new HigherOrderMutation();
+//          mutation.addMutation(mutation1);
+//          mutation.addMutation(mutation2);
+//          processHOM(r, testSource, mutation);
+//
+//          if (DEBUG) {
+//            LOG.fine(
+//                "processed mutations in " + (System.currentTimeMillis() - t0) + " ms.");
+//          }
+//        }
+//      }
     }
-
-  }
 
   /**
    *
@@ -85,18 +85,22 @@ public class GeneticAlgorithmMutationTestWorker extends MutationTestWorker {
       mutationDetected = new MutationStatusTestPair(0,
           DetectionStatus.RUN_ERROR);
     } else {
-
       mutationDetected = runMutation(mutation, allTests, listener);
     }
 
-    try {
-      r.report(null, mutationDetected);
-    } catch (IOException e) {
+    if (mutation.getOrder() == 1) {
+      try {
+        r.describe(mutation.getIds().get(0));
+        r.report(mutation.getIds().get(0), mutationDetected);
+      } catch (IOException e) {
 
+      }
     }
-    LOG.info(mutation.toString());
-    LOG.info("Killed Tests: " + listener.getKilledTests());
-    LOG.info("Survived Tests: " + listener.getSurvivedTests());
+
+
+    LOG.fine(mutation.toString());
+    LOG.fine("Killed Tests: " + listener.getKilledTests());
+    LOG.fine("Survived Tests: " + listener.getSurvivedTests());
     return listener;
   }
 
