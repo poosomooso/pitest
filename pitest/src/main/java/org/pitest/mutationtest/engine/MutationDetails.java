@@ -64,8 +64,8 @@ public final class MutationDetails implements Serializable {
   public String toString() {
     return "MutationDetails [id=" + this.id + ", filename=" + this.filename + ", block="
         + this.block + ", lineNumber=" + this.lineNumber + ", description=" + this.description
-        + ", testsInOrder=" + this.testsInOrder + ", isInFinallyBlock="
-        + this.isInFinallyBlock + ", poison=" + this.poison + "]";
+//        + ", testsInOrder=" + this.testsInOrder
+        + ", isInFinallyBlock=" + this.isInFinallyBlock + ", poison=" + this.poison + "]";
   }
 
   public MutationDetails withDescription(String desc) {

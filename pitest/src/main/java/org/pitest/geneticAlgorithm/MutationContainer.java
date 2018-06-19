@@ -13,9 +13,9 @@ import java.util.function.Function;
 
 public class MutationContainer implements Comparable<MutationContainer>{
     private final HigherOrderMutation mutation;
-    private final double              fitness;
-    private final Set<Description>    killedTests;
-    private final double              numTests;
+    private final double           fitness;
+    private final Set<Description> killedTests;
+    private final double           numTests;
 
     public MutationContainer(HigherOrderMutation hom,
         Function<HigherOrderMutation, AllTestDataListener> testRunner,
@@ -31,6 +31,14 @@ public class MutationContainer implements Comparable<MutationContainer>{
 
     public HigherOrderMutation getMutation() {
         return mutation;
+    }
+
+    public double getFitness() {
+        return fitness;
+    }
+
+    public boolean hasValidFitness() {
+        return !(Double.isInfinite(fitness) || Math.abs(fitness) < 1e-10);
     }
 
     /**
@@ -60,7 +68,7 @@ public class MutationContainer implements Comparable<MutationContainer>{
 
     @Override
     public String toString() {
-        return "MutationContainer [fitness=" + fitness + ", killedTests=" + killedTests + ", hom=" + mutation + "]";
+        return "MutationContainer [fitness=" + fitness + ", killedTests=" + killedTests.size() + ", hom=" + mutation + "]";
     }
 
     public double mutationFitness(Map<MutationDetails, MutationContainer> foms) {

@@ -13,10 +13,13 @@ import java.util.stream.Collectors;
 public class GeneticAlgorithm {
     private static final Logger LOG = Log.getLogger();
     private static final int MIN_ORDER = 2;
+    private static final int MAX_ORDER = 3;
     private List<MutationDetails> allFOMs;
     private Function<HigherOrderMutation, AllTestDataListener> testRunner;
     private Map<MutationDetails, MutationContainer> fomFitness;
 
+    private int numDeletions = 0;
+    private int numAdditions = 0;
     public GeneticAlgorithm(List<MutationDetails> allFOMs,
         Function<HigherOrderMutation, AllTestDataListener> testRunner) {
         this.allFOMs = allFOMs;
@@ -29,10 +32,10 @@ public class GeneticAlgorithm {
 
     public void geneticAlgorithm() {
         // actual algorithm
-        int populationSize = 50;
-        double percentDiscarded = 1.0 / 3.0; // TODO: properties file
-        int numDiscarded = (int) (populationSize * percentDiscarded);
-        int numIters = 100;
+        int populationSize = 25;
+        double percentDiscarded = 1.0 / 2.0; // TODO: properties file
+
+        int numIters = 50;
 
         //generate some homs based on foms
         MutationContainer[] homPopulation = genHOMs(2, populationSize);
@@ -40,58 +43,79 @@ public class GeneticAlgorithm {
         for (int i = 0; i < numIters; i++) {
             archive(homPopulation, i);
             Arrays.sort(homPopulation);
-            int j = 0;
+            int numDiscarded = Math.max(
+                arrLastIndexOf(homPopulation), (int) (populationSize * percentDiscarded));
+            int numCrossovers = crossover(homPopulation, numDiscarded);
+            mutate(homPopulation, numCrossovers, numDiscarded);
+        }
+        LOG.info("Num deletions: " + numDeletions);
+        LOG.info("Num additions: " + numAdditions);
 
-            for (; j < numDiscarded / 2; j += 2) {
-                //crossover half of remaining
-                int parentIndex1 = RandomUtils
-                    .randRange(numDiscarded, populationSize);
-                int parentIndex2;
-                do {
-                    parentIndex2 = RandomUtils
-                        .randRange(numDiscarded, populationSize);
-                } while (parentIndex1 == parentIndex2);
+    }
 
-                MutationContainer parent1 = homPopulation[parentIndex1];
-                MutationContainer parent2 = homPopulation[parentIndex2];
-
-                MutationContainer[] children = crossover(parent1.getMutation(),
-                    parent2.getMutation());
-                homPopulation[j] = children[0];
-                homPopulation[j + 1] = children[1];
+    private int arrLastIndexOf(MutationContainer[] homPopulation) {
+        for (int i = homPopulation.length - 1; i >= 0; i--) {
+            if (!homPopulation[i].hasValidFitness()) {
+                return i;
             }
-            for (; j < numDiscarded; j++) {
-                //mutate half of remaining
-                int parentIndex = RandomUtils
-                    .randRange(numDiscarded, populationSize);
-                MutationContainer parent = homPopulation[parentIndex];
-                homPopulation[j] = randomlyMutate(parent.getMutation());
-            }
+        }
+        return 0;
+    }
 
+    public int crossover(MutationContainer[] sortedHOMS, int numDiscarded) {
+        int i = 0;
+        for (; i < numDiscarded / 2; i+=2) {
+            int parentIndex1 = RandomUtils
+                .randRange(numDiscarded, sortedHOMS.length);
+            int parentIndex2 = RandomUtils
+                    .randRange(numDiscarded, sortedHOMS.length);
+
+            MutationContainer parent1 = sortedHOMS[parentIndex1];
+            MutationContainer parent2 = sortedHOMS[parentIndex2];
+
+            MutationContainer[] children = crossoverParents(parent1.getMutation(),
+                parent2.getMutation());
+            sortedHOMS[i] = children[0];
+            sortedHOMS[i + 1] = children[1];
+        }
+        return i;
+    }
+
+    public void mutate(MutationContainer[] sortedHOMS, int startIndex, int numDiscarded) {
+        for (int i = startIndex; i < numDiscarded; i++) {
+            int parentIndex = RandomUtils
+                .randRange(numDiscarded, sortedHOMS.length);
+            MutationContainer parent = sortedHOMS[parentIndex];
+            sortedHOMS[i] = randomlyMutate(parent.getMutation());
         }
     }
 
+
     public MutationContainer randomlyMutate(HigherOrderMutation hom) {
         HigherOrderMutation newMutation;
-        if (hom.getOrder() > 1 && Math.random() < 0.5) { //delete fom
+        if ((hom.getOrder() >= MAX_ORDER) ||
+            (hom.getOrder() > MIN_ORDER && Math.random() < 0.5)) { //delete fom
+            numDeletions++;
             int deletedIndex = RandomUtils.randRange(0, hom.getOrder());
             newMutation = deleteFOM(hom, deletedIndex);
 
         } else { //add fom
-            newMutation = addFOM(hom, generateRandomUnusedFOM(hom, this.allFOMs));
+            numAdditions++;
+            newMutation = addFOM(hom,
+                generateRandomUnusedFOM(hom, this.allFOMs));
         }
 
         return new MutationContainer(newMutation, this.testRunner, this.fomFitness);
     }
 
-    public MutationContainer[] crossover(HigherOrderMutation a, HigherOrderMutation b) {
+    public MutationContainer[] crossoverParents(HigherOrderMutation a, HigherOrderMutation b) {
         int randIndex1;
         int randIndex2;
         try {
             randIndex1 = generateRandomUnusedFOM(b, a.getAllMutationDetails());
             randIndex2 = generateRandomUnusedFOM(a, b.getAllMutationDetails());
         } catch(RuntimeException e) {
-            LOG.fine("Cannot crossover, mutating instead.");
+            LOG.fine("Cannot crossoverParents, mutating instead.");
             return new MutationContainer[] { randomlyMutate(a),
                 randomlyMutate(b) };
         }
@@ -132,6 +156,7 @@ public class GeneticAlgorithm {
     protected HigherOrderMutation addFOM(HigherOrderMutation hom, int fomToAdd) {
         HigherOrderMutation newHom = hom.clone();
         newHom.addMutation(this.allFOMs.get(fomToAdd));
+        LOG.info("" + newHom);
         return newHom;
     }
 
@@ -159,7 +184,8 @@ public class GeneticAlgorithm {
                 "The max order of higher order mutations must be greater than 0.");
         }
         MutationContainer[] homs = new MutationContainer[numHOMs];
-        for (int i = 0; i < numHOMs; i++) {
+        int i = 0;
+        while (i < numHOMs) {
             int order = RandomUtils.randRange(MIN_ORDER, maxOrder+1);
             HigherOrderMutation newHOM = new HigherOrderMutation();
 
@@ -170,7 +196,9 @@ public class GeneticAlgorithm {
 
             MutationContainer container = new MutationContainer(newHOM,
                 this.testRunner, this.fomFitness);
-            homs[i] = container;
+            if (container.hasValidFitness()) {
+                homs[i++] = container;
+            }
         }
         return homs;
     }
