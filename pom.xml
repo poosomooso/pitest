@@ -60,10 +60,9 @@
 	<modules>
 		<module>pitest-build-config</module>
 		<module>pitest</module>
-			<module>pitest-entry</module>
-			<module>pitest-maven</module>
-			<module>pitest-ant</module>
-		<module>pitest-hom</module>
+		<module>pitest-entry</module>
+		<module>pitest-maven</module>
+		<module>pitest-ant</module>
 		<module>pitest-command-line</module>
 		<module>pitest-html-report</module>
 		<module>pitest-maven-verification</module>
@@ -232,6 +231,13 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jar-plugin</artifactId>
+					<!--<configuration>-->
+						<!--<archive>-->
+							<!--<manifest>-->
+								<!--<mainClass>org.pitest.mutationtest.commandline.MutationCoverageReport</mainClass>-->
+							<!--</manifest>-->
+						<!--</archive>-->
+					<!--</configuration>-->
 					<version>2.4</version>
 				</plugin>
 				<plugin>

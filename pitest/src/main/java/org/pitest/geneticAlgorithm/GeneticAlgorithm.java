@@ -15,8 +15,8 @@ public class GeneticAlgorithm {
     private static final int MIN_ORDER = 2;
     private static final int MAX_ORDER = 3;
     private List<MutationDetails> allFOMs;
-    private Function<HigherOrderMutation, AllTestDataListener> testRunner;
-    private Map<MutationDetails, MutationContainer> fomFitness;
+    public Function<HigherOrderMutation, AllTestDataListener> testRunner;
+    public Map<MutationDetails, MutationContainer> fomFitness;
 
     private int numDeletions = 0;
     private int numAdditions = 0;
@@ -32,10 +32,10 @@ public class GeneticAlgorithm {
 
     public void geneticAlgorithm() {
         // actual algorithm
-        int populationSize = 25;
+        int populationSize = 50;
         double percentDiscarded = 1.0 / 2.0; // TODO: properties file
 
-        int numIters = 50;
+        int numIters = 100;
 
         //generate some homs based on foms
         MutationContainer[] homPopulation = genHOMs(2, populationSize);
@@ -185,8 +185,12 @@ public class GeneticAlgorithm {
         }
         MutationContainer[] homs = new MutationContainer[numHOMs];
         int i = 0;
+        int numAttempts = 0;
         while (i < numHOMs) {
-            int order = RandomUtils.randRange(MIN_ORDER, maxOrder+1);
+            if (++numAttempts % 10 == 0) {
+                LOG.info("Currently there have been " + numAttempts + " attempts at generating HOMS, " + i + " HOMS generated");
+            }
+            int order = 2; //RandomUtils.randRange(MIN_ORDER, maxOrder+1);
             HigherOrderMutation newHOM = new HigherOrderMutation();
 
             for (int j = 0; j < order; j++) {
@@ -196,7 +200,7 @@ public class GeneticAlgorithm {
 
             MutationContainer container = new MutationContainer(newHOM,
                 this.testRunner, this.fomFitness);
-            if (container.hasValidFitness()) {
+            if (container.hasValidFitness() || i > 9) {
                 homs[i++] = container;
             }
         }

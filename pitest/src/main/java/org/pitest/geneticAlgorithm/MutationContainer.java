@@ -92,4 +92,23 @@ public class MutationContainer implements Comparable<MutationContainer>{
         Log.getLogger().fine("FOM: " + fragilityFOM + " HOM: " + fragilityHOM);
         return fragilityHOM / fragilityFOM;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+
+        MutationContainer that = (MutationContainer) o;
+
+        return mutation == null ?
+            that.mutation == null :
+            mutation.equals(that.mutation);
+    }
+
+    @Override
+    public int hashCode() {
+        return mutation.hashCode();
+    }
 }

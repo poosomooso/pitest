@@ -3,7 +3,9 @@ package org.pitest.mutationtest.engine;
 import org.pitest.classinfo.ClassName;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -81,5 +83,24 @@ public class HigherOrderMutation {
         HigherOrderMutation m = new HigherOrderMutation();
         m.addMutation(fom);
         return m;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+
+        HigherOrderMutation that = (HigherOrderMutation) o;
+        Set<MutationDetails> myMutations = new HashSet<MutationDetails>(
+            this.mutants);
+        return myMutations.containsAll(that.mutants);
+    }
+
+    @Override
+    public int hashCode() {
+        return mutants != null ?
+            mutants.stream().mapToInt(MutationDetails::hashCode).sum() : 0;
     }
 }
