@@ -6,6 +6,7 @@ import org.pitest.mutationtest.execute.AllTestDataListener;
 import org.pitest.testapi.Description;
 import org.pitest.util.Log;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -26,6 +27,7 @@ public class MutationContainer implements Comparable<MutationContainer>{
         this.numTests =
             listener.getKilledTests().size() + listener.getSurvivedTests()
                 .size();
+        Log.getLogger().info(""+this.numTests);
         this.fitness = mutationFitness(foms);
     }
 
@@ -78,13 +80,15 @@ public class MutationContainer implements Comparable<MutationContainer>{
         }
         Set<Description> fomKilledTests = null;
         for (MutationDetails m : mutation.getAllMutationDetails()) {
+            Log.getLogger().fine("FOM: killed " + foms.get(m));
             Log.getLogger().fine("FOM: killed " + foms.get(m).killedTests.size());
             if (fomKilledTests == null) {
-                fomKilledTests = foms.get(m).killedTests;
+                fomKilledTests = new HashSet<>(foms.get(m).killedTests);
             } else {
                 // intersect
                 fomKilledTests.retainAll(foms.get(m).killedTests);
             }
+            Log.getLogger().fine("current fom test " +fomKilledTests.size());
         }
 
         double fragilityFOM = fomKilledTests.size() / this.numTests;

@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 public class GeneticAlgorithm {
     private static final Logger LOG = Log.getLogger();
     private static final int MIN_ORDER = 2;
-    private static final int MAX_ORDER = 3;
+    private static final int MAX_ORDER = 5;
     private List<MutationDetails> allFOMs;
     public Function<HigherOrderMutation, AllTestDataListener> testRunner;
     public Map<MutationDetails, MutationContainer> fomFitness;
