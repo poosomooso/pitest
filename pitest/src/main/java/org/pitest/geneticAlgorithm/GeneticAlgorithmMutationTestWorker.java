@@ -36,39 +36,41 @@ public class GeneticAlgorithmMutationTestWorker extends MutationTestWorker {
   public void run(final Collection<MutationDetails> range, final Reporter r,
       final TimeOutDecoratedTestSource testSource) throws IOException {
 
-//    GeneticAlgorithm ga = new GeneticAlgorithm(Collections.unmodifiableList(new ArrayList<>(range)),
-//        hom -> processHOM(r, testSource, hom));
+    GeneticAlgorithm ga = new GeneticAlgorithm(Collections.unmodifiableList(new ArrayList<>(range)),
+        hom -> processHOM(r, testSource, hom));
 
-    List<MutationDetails> lineNo32 = new ArrayList<>();
-    for (MutationDetails m : range) {
-      if (m.getLineNumber() == 32) {
-        lineNo32.add(m);
-        LOG.info(""+m);
-      }
-    }
-
-    GeneticAlgorithm ga = new GeneticAlgorithm(Collections.unmodifiableList(new ArrayList<>(lineNo32)),
-                hom -> processHOM(r, testSource, hom));
-    LOG.info("" + ga.fomFitness);
-
-    for (MutationDetails mutation1 : lineNo32) {
-      for (MutationDetails mutation2 : lineNo32) {
-        if (!mutation1.equals(mutation2)) {
-          LOG.info("" + mutation1);
-          LOG.info("" + mutation2);
-          HigherOrderMutation mutation = new HigherOrderMutation();
-          mutation.addMutation(mutation1);
-          mutation.addMutation(mutation2);
-          MutationContainer container = new MutationContainer(mutation,
-              ga.testRunner, ga.fomFitness);
-          LOG.info("" + container);
-        }
-      }
-    }
+    //getting mutations on one line
+//    List<MutationDetails> lineNo32 = new ArrayList<>();
+//    for (MutationDetails m : range) {
+//      if (m.getLineNumber() == 32) {
+//        lineNo32.add(m);
+//        LOG.info(""+m);
+//      }
+//    }
+//
+//    GeneticAlgorithm ga = new GeneticAlgorithm(Collections.unmodifiableList(new ArrayList<>(lineNo32)),
+//                hom -> processHOM(r, testSource, hom));
+//    LOG.info("" + ga.fomFitness);
+//
+//    for (MutationDetails mutation1 : lineNo32) {
+//      for (MutationDetails mutation2 : lineNo32) {
+//        if (!mutation1.equals(mutation2)) {
+//          LOG.info("" + mutation1);
+//          LOG.info("" + mutation2);
+//          HigherOrderMutation mutation = new HigherOrderMutation();
+//          mutation.addMutation(mutation1);
+//          mutation.addMutation(mutation2);
+//          MutationContainer container = new MutationContainer(mutation,
+//              ga.testRunner, ga.fomFitness);
+//          LOG.info("" + container);
+//        }
+//      }
+//    }
 
     LOG.info(
         "STARTING GENETIC ALGORITHM -------------------------- SIZE " + range.size());
-//        ga.geneticAlgorithm();
+        ga.geneticAlgorithm();
+
     // all pairs of mutants
 //    for (final MutationDetails mutation1 : range) {
 //      for (final MutationDetails mutation2 : range) {

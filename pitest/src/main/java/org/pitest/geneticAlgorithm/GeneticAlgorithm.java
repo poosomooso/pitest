@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 public class GeneticAlgorithm {
     private static final Logger LOG = Log.getLogger();
     private static final int MIN_ORDER = 2;
-    private static final int MAX_ORDER = 5;
+    private static final int MAX_ORDER = 10;
     private List<MutationDetails> allFOMs;
     public Function<HigherOrderMutation, AllTestDataListener> testRunner;
     public Map<MutationDetails, MutationContainer> fomFitness;
@@ -32,8 +32,8 @@ public class GeneticAlgorithm {
 
     public void geneticAlgorithm() {
         // actual algorithm
-        int populationSize = 50;
-        double percentDiscarded = 1.0 / 2.0; // TODO: properties file
+        int populationSize = 10000;
+        double percentDiscarded = 1.0 / 3.0; // TODO: properties file
 
         int numIters = 100;
 
@@ -156,7 +156,6 @@ public class GeneticAlgorithm {
     protected HigherOrderMutation addFOM(HigherOrderMutation hom, int fomToAdd) {
         HigherOrderMutation newHom = hom.clone();
         newHom.addMutation(this.allFOMs.get(fomToAdd));
-        LOG.info("" + newHom);
         return newHom;
     }
 
@@ -200,7 +199,7 @@ public class GeneticAlgorithm {
 
             MutationContainer container = new MutationContainer(newHOM,
                 this.testRunner, this.fomFitness);
-            if (container.hasValidFitness() || i > 9) {
+            if (container.hasValidFitness() || i > numHOMs/2) {
                 homs[i++] = container;
             }
         }

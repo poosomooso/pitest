@@ -33,40 +33,30 @@ import org.pitest.util.PitError;
  */
 public class InlineConstantMutator implements MethodMutatorFactory {
 
-  private final class InlineConstantVisitor extends MethodVisitor {
+  protected class InlineConstantVisitor extends MethodVisitor {
     private final MutationContext context;
 
-    InlineConstantVisitor(final MutationContext context,
+    protected InlineConstantVisitor(final MutationContext context,
         final MethodVisitor delegateVisitor) {
       super(Opcodes.ASM6, delegateVisitor);
       this.context = context;
     }
 
-    private void mutate(final Double constant) {
+    protected Number mutate(final Double constant) {
       // avoid addition to floating points as may yield same value
 
       final Double replacement = (constant == 1D) ? 2D : 1D;
-
-      if (shouldMutate(constant, replacement)) {
-        translateToByteCode(replacement);
-      } else {
-        translateToByteCode(constant);
-      }
+      return replacement;
     }
 
-    private void mutate(final Float constant) {
+    protected Number mutate(final Float constant) {
       // avoid addition to floating points as may yield same value
 
       final Float replacement = (constant == 1F) ? 2F : 1F;
-
-      if (shouldMutate(constant, replacement)) {
-        translateToByteCode(replacement);
-      } else {
-        translateToByteCode(constant);
-      }
+      return replacement;
     }
 
-    private void mutate(final Integer constant) {
+    protected Number mutate(final Integer constant) {
       final Integer replacement;
 
       switch (constant.intValue()) {
@@ -83,41 +73,54 @@ public class InlineConstantMutator implements MethodMutatorFactory {
         replacement = Integer.valueOf(constant + 1);
         break;
       }
-
-      if (shouldMutate(constant, replacement)) {
-        translateToByteCode(replacement);
-      } else {
-        translateToByteCode(constant);
-      }
+      return replacement;
     }
 
-    private void mutate(final Long constant) {
+    protected Number mutate(final Long constant) {
 
       final Long replacement = constant + 1L;
-
-      if (shouldMutate(constant, replacement)) {
-        translateToByteCode(replacement);
-      } else {
-        translateToByteCode(constant);
-      }
-
+      return replacement;
     }
 
     private void mutate(final Number constant) {
 
+      Number replacement;
       if (constant instanceof Integer) {
-        mutate((Integer) constant);
+        replacement = mutate((Integer) constant);
       } else if (constant instanceof Long) {
-        mutate((Long) constant);
+        replacement = mutate((Long) constant);
       } else if (constant instanceof Float) {
-        mutate((Float) constant);
+        replacement = mutate((Float) constant);
       } else if (constant instanceof Double) {
-        mutate((Double) constant);
+        replacement = mutate((Double) constant);
       } else {
         throw new PitError("Unsupported subtype of Number found:"
             + constant.getClass());
       }
 
+      correctlyTranslateToByteCode(constant, replacement);
+    }
+
+    protected void correctlyTranslateToByteCode(Number constant,
+        Number replacement) {
+      Number toByteCode;
+      if (shouldMutate(constant, replacement)) {
+        toByteCode = replacement;
+      } else {
+        toByteCode = constant;
+      }
+      if (toByteCode instanceof Integer) {
+        translateToByteCode((Integer) toByteCode);
+      } else if (toByteCode instanceof Long) {
+        translateToByteCode((Long) toByteCode);
+      } else if (toByteCode instanceof Float) {
+        translateToByteCode((Float) toByteCode);
+      } else if (toByteCode instanceof Double) {
+        translateToByteCode((Double) toByteCode);
+      } else {
+        throw new PitError("Unsupported subtype of Number found:"
+            + toByteCode.getClass());
+      }
     }
 
     private <T extends Number> boolean shouldMutate(final T constant,

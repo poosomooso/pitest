@@ -53,6 +53,7 @@ import org.pitest.mutationtest.engine.gregor.mutators.experimental.NakedReceiver
 import org.pitest.mutationtest.engine.gregor.mutators.experimental.RemoveIncrementsMutator;
 import org.pitest.mutationtest.engine.gregor.mutators.experimental.RemoveSwitchMutator;
 import org.pitest.mutationtest.engine.gregor.mutators.experimental.SwitchMutator;
+import org.pitest.mutationtest.engine.gregor.mutators.milu.*;
 
 public final class Mutator {
 
@@ -148,6 +149,31 @@ public final class Mutator {
     addGroup("RETURNS", betterReturns());
 
     /**
+     * MILU Operators
+     */
+    add("TO_ADD",                   ToAddMutator.TO_ADD_MUTATOR);
+    add("TO_SUB",                   ToSubMutator.TO_SUB_MUTATOR);
+    add("TO_MULT",                  ToMultMutator.TO_MULT_MUTATOR);
+    add("TO_DIV",                   ToDivMutator.TO_DIV_MUTATOR);
+    add("TO_MOD",                   ToModMutator.TO_MOD_MUTATOR);
+    add("TO_AND",                   ToAndMutator.TO_AND_MUTATOR);
+    add("TO_OR",                    ToOrMutator.TO_OR_MUTATOR);
+    add("TO_XOR",                   ToXorMutator.TO_XOR_MUTATOR);
+    add("TO_SHIFT_LEFT",            ToShiftLeftMutator.TO_SHIFT_LEFT_MUTATOR);
+    add("TO_SHIFT_RIGHT",           ToShiftRightMutator.TO_SHIFT_RIGHT_MUTATOR);
+    add("TO_U_SHIFT_RIGHT",         ToUShiftRightMutator.TO_U_SHIFT_RIGHT_MUTATOR);
+    add("TO_LT_MUTATOR",            ToLTMutator.TO_LT_MUTATOR);
+    add("TO_LE_MUTATOR",            ToLEMutator.TO_LE_MUTATOR);
+    add("TO_GT_MUTATOR",            ToGTMutator.TO_GT_MUTATOR);
+    add("TO_GE_MUTATOR",            ToGEMutator.TO_GE_MUTATOR);
+    add("TO_EQUAL_MUTATOR",         ToEqualMutator.TO_EQUAL_MUTATOR);
+    add("TO_NOT_EQUAL_MUTATOR",     ToNotEqualMutator.TO_NOT_EQUAL_MUTATOR);
+    add("CONST_TO_ZERO_MUTATOR",    new ConstToZeroMutator());
+    add("CONST_TO_ONE_MUTATOR",     new ConstToOneMutator());
+    add("CONST_TO_NEGONE_MUTATOR",  new ConstToNegOneMutator());
+
+
+    /**
      * Experimental mutator that removed assignments to member variables.
      */
     add("EXPERIMENTAL_MEMBER_VARIABLE",
@@ -201,12 +227,34 @@ public final class Mutator {
    * performance
    */
   public static Collection<MethodMutatorFactory> defaults() {
-    return group(InvertNegsMutator.INVERT_NEGS_MUTATOR,
-        ReturnValsMutator.RETURN_VALS_MUTATOR, MathMutator.MATH_MUTATOR,
-        VoidMethodCallMutator.VOID_METHOD_CALL_MUTATOR,
-        NegateConditionalsMutator.NEGATE_CONDITIONALS_MUTATOR,
-        ConditionalsBoundaryMutator.CONDITIONALS_BOUNDARY_MUTATOR,
-        IncrementsMutator.INCREMENTS_MUTATOR);
+//    return group(InvertNegsMutator.INVERT_NEGS_MUTATOR,
+//        ReturnValsMutator.RETURN_VALS_MUTATOR, MathMutator.MATH_MUTATOR,
+//        VoidMethodCallMutator.VOID_METHOD_CALL_MUTATOR,
+//        NegateConditionalsMutator.NEGATE_CONDITIONALS_MUTATOR,
+//        ConditionalsBoundaryMutator.CONDITIONALS_BOUNDARY_MUTATOR,
+//        IncrementsMutator.INCREMENTS_MUTATOR);
+
+    return group(ToAddMutator.TO_ADD_MUTATOR,
+        ToSubMutator.TO_SUB_MUTATOR,
+        ToMultMutator.TO_MULT_MUTATOR,
+        ToDivMutator.TO_DIV_MUTATOR,
+        ToModMutator.TO_MOD_MUTATOR,
+        ToAndMutator.TO_AND_MUTATOR,
+        ToOrMutator.TO_OR_MUTATOR,
+        ToXorMutator.TO_XOR_MUTATOR,
+        ToShiftLeftMutator.TO_SHIFT_LEFT_MUTATOR,
+        ToShiftRightMutator.TO_SHIFT_RIGHT_MUTATOR,
+        ToUShiftRightMutator.TO_U_SHIFT_RIGHT_MUTATOR,
+        ToLTMutator.TO_LT_MUTATOR,
+        ToLEMutator.TO_LE_MUTATOR,
+        ToGTMutator.TO_GT_MUTATOR,
+        ToGEMutator.TO_GE_MUTATOR,
+        ToEqualMutator.TO_EQUAL_MUTATOR,
+        ToNotEqualMutator.TO_NOT_EQUAL_MUTATOR,
+        IncrementsMutator.INCREMENTS_MUTATOR,
+        new ConstToZeroMutator(),
+        new ConstToOneMutator(),
+        new ConstToNegOneMutator());
   }
 
   /**

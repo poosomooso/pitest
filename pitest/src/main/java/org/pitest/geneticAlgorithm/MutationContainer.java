@@ -27,7 +27,6 @@ public class MutationContainer implements Comparable<MutationContainer>{
         this.numTests =
             listener.getKilledTests().size() + listener.getSurvivedTests()
                 .size();
-        Log.getLogger().info(""+this.numTests);
         this.fitness = mutationFitness(foms);
     }
 

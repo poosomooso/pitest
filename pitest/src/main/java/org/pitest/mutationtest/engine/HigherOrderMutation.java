@@ -95,7 +95,12 @@ public class HigherOrderMutation {
         HigherOrderMutation that = (HigherOrderMutation) o;
         Set<MutationDetails> myMutations = new HashSet<MutationDetails>(
             this.mutants);
-        return myMutations.containsAll(that.mutants);
+        for (MutationDetails m : that.mutants) {
+            if (!myMutations.remove(m)) {
+                return false;
+            }
+        }
+        return myMutations.isEmpty();
     }
 
     @Override
